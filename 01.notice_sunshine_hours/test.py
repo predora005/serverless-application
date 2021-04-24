@@ -8,6 +8,8 @@ import pandas as pd
 import boto3
 import decimal
 from boto3.dynamodb.conditions import Key
+import slackweb
+import json
 
 ##################################################
 # 日毎の日照時間を抽出
@@ -86,6 +88,37 @@ def get_db(point_name, start_date, end_date):
     df = pd.json_normalize(response['Items'])
     return df
     
+    
+##################################################
+# Slackに投稿する
+##################################################
+def post_to_slack(df):
+    
+    # 過去1週間の日照時間を合計し、メッセージを作成
+    one_week_hours = df['sunshine_hours'].sum()
+    pretext = f"{df['point_name'][0]} 過去1週間の日照時間は{one_week_hours} hoursです。"
+    pretext += f"平年の{4}月平均は{41} hoursです。"
+    
+    # 日毎の日照時間をfieldsにセットする
+    fields = []
+    for index, row in df.iterrows():
+        # ex) title='2021-04-18', value = '11.9 hours'
+        title = row['date']
+        value = f"{row['sunshine_hours']} hours"
+        
+        field= {'title': title, 'value': value}
+        fields.append(field)
+    
+    # Slackに送るメッセージをセット
+    color = '#f49d00'
+    attachments = []
+    attachments.append({
+        'pretext': pretext, 'fields': fields, 'color': color})
+    
+    url = ''
+    slack = slackweb.Slack(url=url)
+    slack.notify(attachments=attachments)
+
 ##################################################
 # メイン
 ##################################################
@@ -94,18 +127,21 @@ if __name__ == '__main__':
     # 水戸市の都道府県番号と観測所番号
     prec_no = 40
     block_no = 47629
+    point_name = '水戸市'
     
-    # 開始日付と終了日付
+    # 前日の日照時間を取得する。
+    end_date =  datetime.date.today() + datetime.timedelta(days=-1)
+    start_date = end_date
+    df = get_sunshine_hours(prec_no, block_no, start_date, end_date)
+    
+    # DynamoDBに前日の日照時間を書き込み
+    put_db('水戸市', df)
+    
+    # DynamoDBから過去1週間分の日照時間を読み込み
     end_date =  datetime.date.today() + datetime.timedelta(days=-1)
     start_date = end_date + datetime.timedelta(days=-6)
+    df = get_db('水戸市', start_date, end_date)
     
-    #df = get_sunshine_hours(prec_no, block_no, start_date, end_date)
-    #print(df)
-    
-    # DynamoDBに書き込み
-    #put_db('水戸', df)
-    
-    # DynamoDBから読み込み
-    df = get_db('水戸', start_date, end_date)
-    print(df)
+    # Slackに投稿する
+    post_to_slack(df)
     
