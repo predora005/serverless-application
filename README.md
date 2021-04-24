@@ -1,4 +1,5 @@
 # serverless-application
+サーバーレスアプリケーションを色々試すリポジトリ
 
 ## Requirement
 
@@ -7,6 +8,7 @@
 - beautiful soop
 - numpy
 - pandas
+- boto3
 
 ## Install
 
@@ -16,6 +18,7 @@ pip3 install requests --user
 pip3 install bs4 --user
 pip3 install numpy --user
 pip3 install pandas --user
+pip3 install boto3 --user
 
 ## Licence
 
