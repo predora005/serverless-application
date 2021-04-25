@@ -41,9 +41,9 @@ def get_sunshine_hours(prec_no, block_no, start_date, end_date):
     return df
     
 ##################################################
-# メイン
+# エントリーポイント
 ##################################################
-if __name__ == '__main__':
+def lambda_handler(event, context):
     
     # 水戸市の都道府県番号と観測所番号
     prec_no = 40
