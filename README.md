@@ -9,10 +9,11 @@
 - numpy
 - pandas
 - boto3
-- slackweb
+- slack_sdk
 
 ## Install
 
+```sh
 sudo yum install python3
 sudo yum install python3-pip
 pip3 install requests --user
@@ -20,7 +21,8 @@ pip3 install bs4 --user
 pip3 install numpy --user
 pip3 install pandas --user
 pip3 install boto3 --user
-pip3 install slackweb --user
+pip3 install slack_sdk --user
+```
 
 ## Licence
 
